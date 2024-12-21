@@ -1,21 +1,21 @@
 @main
 def main(file: String = "input.txt") = {
 
-  val file =
-    """|7 6 4 2 1
-       |1 2 7 8 9
-       |9 7 6 2 1
-       |1 3 2 4 5
-       |8 6 4 4 1
-       |1 3 6 7 9
-       |""".stripMargin
-      .split("\n")
+//  val file =
+//    """|7 6 4 2 1
+//       |1 2 7 8 9
+//       |9 7 6 2 1
+//       |1 3 2 4 5
+//       |8 6 4 4 1
+//       |1 3 6 7 9
+//       |""".stripMargin
+//      .split("\n")
 
-//  val file = scala.io.Source.fromFile(file).getLines
+  val input = scala.io.Source.fromFile(file).getLines
 
   def badDifference(n: Int) = n == 0 || n > 3 || n < -3
 
-  def isValidReport(report: List[Int]) = {
+  def isValidReport(report: List[Int]): Boolean = {
     val (_, diffList) = report.tail.foldLeft((report.head, List.empty[Int])) {
       case ((prev, acc), next) =>
         val diff = next - prev
@@ -28,34 +28,48 @@ def main(file: String = "input.txt") = {
     failedNegatives.size == 0 || failedPositives.size == 0
   }
 
-  file
+  input
     .map(row => row.split(" ").toList.map(_.toInt))
     .map { report =>
-      if isValidReport(report) then
-        println(s"1: ${report.mkString}")
-        1
-      else {
-        report.tail.foldLeft((report.head, List.empty[Int])) {
-          case ((prev, acc), next) =>
-            (next, if (badDifference(next - prev)) then report.indexOf(next) :: acc else acc)
-        } match {
-          case (_, ls) if ls.size > 0 =>
-            (0 :: ls).foldLeft(false) {
-              case (acc, next) =>
-                if (isValidReport(report.patch(next, List.empty[Int], 1))) true else acc
-            } match {
-              case true =>
-                println(s"1: ${report.mkString}")
-                1
-              case _ =>
-                println(s"0: ${report.mkString}")
-                0
-            }
-          case _ =>
-            println(s"0: ${report.mkString}")
-            0
+      if isValidReport(report) then 1
+      else
+        Range(0, report.size).toList.foldLeft(0) {
+          case (1, _) => 1
+          case (_, nextIndexToDrop) =>
+            if isValidReport(report.patch(nextIndexToDrop, List.empty, 1)) then 1
+            else 0
         }
-      }
+    }
+    .sum
+
+//  file
+//    .map(row => row.split(" ").toList.map(_.toInt))
+//    .map { report =>
+//      if isValidReport(report) then
+//        println(s"1: ${report.mkString}")
+//        1
+//      else {
+//        report.tail.foldLeft((report.head, List.empty[Int])) {
+//          case ((prev, acc), next) =>
+//            (next, if (badDifference(next - prev)) then report.indexOf(next) :: acc else acc)
+//        } match {
+//          case (_, ls) if ls.size > 0 =>
+//            (0 :: ls).foldLeft(false) {
+//              case (acc, next) =>
+//                if (isValidReport(report.patch(next, List.empty[Int], 1))) true else acc
+//            } match {
+//              case true =>
+//                println(s"1: ${report.mkString}")
+//                1
+//              case _ =>
+//                println(s"0: ${report.mkString}")
+//                0
+//            }
+//          case _ =>
+//            println(s"0: ${report.mkString}")
+//            0
+//        }
+//      }
 //      else {
 //        val firstDiff = diffList.find(d => (d > 3 || d < -3 || d == 0))
 //        val indexOpt = firstDiff.map(i => diffList.indexOf(i) + 1)
@@ -74,6 +88,6 @@ def main(file: String = "input.txt") = {
 //            }
 //        }
 //      }
-    }
-    .sum
+//    }
+//    .sum
 }
